@@ -1,0 +1,28 @@
+function(resolve_node_module specifier result)
+  set(dirname ${CMAKE_CURRENT_LIST_DIR})
+
+  cmake_path(GET dirname ROOT_PATH root)
+
+  while(TRUE)
+    cmake_path(
+      APPEND dirname node_modules ${specifier} package.json
+      OUTPUT_VARIABLE target
+    )
+
+    if(EXISTS ${target})
+      cmake_path(GET target PARENT_PATH ${result})
+
+      return(PROPAGATE ${result})
+    endif()
+
+    if(dirname PATH_EQUAL root)
+      break()
+    endif()
+
+    cmake_path(GET dirname PARENT_PATH dirname)
+  endwhile()
+
+  set(${result} ${specifier}-NOTFOUND)
+
+  return(PROPAGATE ${result})
+endfunction()
