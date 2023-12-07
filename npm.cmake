@@ -12,6 +12,8 @@ function(resolve_node_module specifier result)
     if(EXISTS ${target})
       cmake_path(GET target PARENT_PATH ${result})
 
+      cmake_path(NATIVE_PATH ${result} NORMALIZE ${result})
+
       return(PROPAGATE ${result})
     endif()
 
