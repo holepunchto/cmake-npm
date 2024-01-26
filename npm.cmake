@@ -1,3 +1,12 @@
+function(install_node_modules)
+  execute_process(
+    COMMAND npm install
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    OUTPUT_QUIET
+    COMMAND_ERROR_IS_FATAL ANY
+  )
+endfunction()
+
 function(resolve_node_module specifier result)
   set(dirname ${CMAKE_CURRENT_LIST_DIR})
 
