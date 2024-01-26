@@ -1,6 +1,8 @@
 function(install_node_modules)
+  find_npm(npm)
+
   execute_process(
-    COMMAND npm install
+    COMMAND ${npm} install
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     OUTPUT_QUIET
     COMMAND_ERROR_IS_FATAL ANY
@@ -34,6 +36,26 @@ function(resolve_node_module specifier result)
   endwhile()
 
   set(${result} ${specifier}-NOTFOUND)
+
+  return(PROPAGATE ${result})
+endfunction()
+
+function(find_npm result)
+  if(WIN32)
+    find_program(
+      npm
+      NAMES npm.cmd npm
+      REQUIRED
+    )
+  else()
+    find_program(
+      npm
+      NAMES npm
+      REQUIRED
+    )
+  endif()
+
+  set(${result} ${npm})
 
   return(PROPAGATE ${result})
 endfunction()
