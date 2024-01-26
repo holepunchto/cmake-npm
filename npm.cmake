@@ -1,3 +1,23 @@
+function(find_npm result)
+  if(WIN32)
+    find_program(
+      npm
+      NAMES npm.cmd npm
+      REQUIRED
+    )
+  else()
+    find_program(
+      npm
+      NAMES npm
+      REQUIRED
+    )
+  endif()
+
+  set(${result} ${npm})
+
+  return(PROPAGATE ${result})
+endfunction()
+
 function(install_node_modules)
   find_npm(npm)
 
@@ -36,26 +56,6 @@ function(resolve_node_module specifier result)
   endwhile()
 
   set(${result} ${specifier}-NOTFOUND)
-
-  return(PROPAGATE ${result})
-endfunction()
-
-function(find_npm result)
-  if(WIN32)
-    find_program(
-      npm
-      NAMES npm.cmd npm
-      REQUIRED
-    )
-  else()
-    find_program(
-      npm
-      NAMES npm
-      REQUIRED
-    )
-  endif()
-
-  set(${result} ${npm})
 
   return(PROPAGATE ${result})
 endfunction()
