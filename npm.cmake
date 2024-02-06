@@ -19,10 +19,20 @@ function(find_npm result)
 endfunction()
 
 function(install_node_modules)
+  cmake_parse_arguments(
+    PARSE_ARGV 0 ARGV "LOCKFILE" "" ""
+  )
+
   find_npm(npm)
 
+  if(ARGV_LOCKFILE)
+    set(command install-clean)
+  else()
+    set(command install)
+  endif()
+
   execute_process(
-    COMMAND ${npm} install
+    COMMAND ${npm} ${command}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     OUTPUT_QUIET
     COMMAND_ERROR_IS_FATAL ANY
