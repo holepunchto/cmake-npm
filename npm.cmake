@@ -37,6 +37,14 @@ function(install_node_modules)
     OUTPUT_QUIET
     COMMAND_ERROR_IS_FATAL ANY
   )
+
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS
+      package.json
+      package-lock.json
+  )
 endfunction()
 
 function(resolve_node_module specifier result)
