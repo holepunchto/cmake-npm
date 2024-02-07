@@ -20,8 +20,14 @@ endfunction()
 
 function(install_node_modules)
   cmake_parse_arguments(
-    PARSE_ARGV 0 ARGV "LOCKFILE" "" ""
+    PARSE_ARGV 0 ARGV "LOCKFILE" "WORKING_DIRECTORY" ""
   )
+
+  if(ARGV_WORKING_DIRECTORY)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  else()
+    set(ARGV_WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  endif()
 
   find_npm(npm)
 
@@ -33,13 +39,13 @@ function(install_node_modules)
 
   execute_process(
     COMMAND ${npm} ${command}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    WORKING_DIRECTORY ${ARGV_WORKING_DIRECTORY}
     OUTPUT_QUIET
     COMMAND_ERROR_IS_FATAL ANY
   )
 
   set_property(
-    DIRECTORY
+    DIRECTORY ${ARGV_WORKING_DIRECTORY}
     APPEND
     PROPERTY CMAKE_CONFIGURE_DEPENDS
       package.json
@@ -48,7 +54,17 @@ function(install_node_modules)
 endfunction()
 
 function(resolve_node_module specifier result)
-  set(dirname ${CMAKE_CURRENT_LIST_DIR})
+  cmake_parse_arguments(
+    PARSE_ARGV 0 ARGV "" "WORKING_DIRECTORY" ""
+  )
+
+  if(ARGV_WORKING_DIRECTORY)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  else()
+    set(ARGV_WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  endif()
+
+  set(dirname ${ARGV_WORKING_DIRECTORY})
 
   cmake_path(GET dirname ROOT_PATH root)
 
