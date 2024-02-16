@@ -13,7 +13,7 @@ function(find_npm result)
     )
   endif()
 
-  set(${result} ${npm})
+  set(${result} "${npm}")
 
   return(PROPAGATE ${result})
 endfunction()
@@ -24,9 +24,9 @@ function(install_node_modules)
   )
 
   if(ARGV_WORKING_DIRECTORY)
-    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} NORMALIZE)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NORMALIZE)
   else()
-    set(ARGV_WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+    set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
   find_npm(npm)
@@ -38,14 +38,14 @@ function(install_node_modules)
   endif()
 
   execute_process(
-    COMMAND ${npm} ${command}
-    WORKING_DIRECTORY ${ARGV_WORKING_DIRECTORY}
+    COMMAND "${npm}" ${command}
+    WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_QUIET
     COMMAND_ERROR_IS_FATAL ANY
   )
 
   set_property(
-    DIRECTORY ${ARGV_WORKING_DIRECTORY}
+    DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     APPEND
     PROPERTY CMAKE_CONFIGURE_DEPENDS
       package.json
@@ -59,18 +59,18 @@ function(resolve_node_module specifier result)
   )
 
   if(ARGV_WORKING_DIRECTORY)
-    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} NORMALIZE)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NORMALIZE)
   else()
-    set(ARGV_WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+    set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
-  set(dirname ${ARGV_WORKING_DIRECTORY})
+  set(dirname "${ARGV_WORKING_DIRECTORY}")
 
   cmake_path(GET dirname ROOT_PATH root)
 
   while(TRUE)
     cmake_path(
-      APPEND dirname node_modules ${specifier} package.json
+      APPEND dirname node_modules "${specifier}" package.json
       OUTPUT_VARIABLE target
     )
 
@@ -87,7 +87,7 @@ function(resolve_node_module specifier result)
     cmake_path(GET dirname PARENT_PATH dirname)
   endwhile()
 
-  set(${result} ${specifier}-NOTFOUND)
+  set(${result} "${specifier}-NOTFOUND")
 
   return(PROPAGATE ${result})
 endfunction()
