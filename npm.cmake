@@ -44,12 +44,16 @@ function(install_node_modules)
     COMMAND_ERROR_IS_FATAL ANY
   )
 
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
+
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package-lock.json OUTPUT_VARIABLE package_lock_path)
+
   set_property(
-    DIRECTORY "${ARGV_WORKING_DIRECTORY}"
+    DIRECTORY
     APPEND
     PROPERTY CMAKE_CONFIGURE_DEPENDS
-      package.json
-      package-lock.json
+      "${package_path}"
+      "${package_lock_path}"
   )
 endfunction()
 
