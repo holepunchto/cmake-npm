@@ -108,7 +108,7 @@ function(list_node_modules result)
   endif()
 
   if(ARGV_DEVELOPMENT)
-    list(APPEND args DEVELOPMENT)
+    set(DEVELOPMENT DEVELOPMENT)
   endif()
 
   cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
@@ -139,7 +139,7 @@ function(list_node_modules result)
 
           list(APPEND ${result} "${resolved}")
 
-          list_node_modules(${result} WORKING_DIRECTORY ${resolved} ${args})
+          list_node_modules(${result} WORKING_DIRECTORY ${resolved} ${DEVELOPMENT})
         endif()
       endforeach()
     endif()
