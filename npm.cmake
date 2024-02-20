@@ -59,7 +59,7 @@ endfunction()
 
 function(resolve_node_module specifier result)
   cmake_parse_arguments(
-    PARSE_ARGV 0 ARGV "" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 2 ARGV "" "WORKING_DIRECTORY" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -92,6 +92,58 @@ function(resolve_node_module specifier result)
   endwhile()
 
   set(${result} "${specifier}-NOTFOUND")
+
+  return(PROPAGATE ${result})
+endfunction()
+
+function(list_node_modules result)
+  cmake_parse_arguments(
+    PARSE_ARGV 1 ARGV "DEVELOPMENT" "WORKING_DIRECTORY" ""
+  )
+
+  if(ARGV_WORKING_DIRECTORY)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NORMALIZE)
+  else()
+    set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
+  endif()
+
+  if(ARGV_DEVELOPMENT)
+    list(APPEND args DEVELOPMENT)
+  endif()
+
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
+
+  file(READ "${package_path}" package)
+
+  list(APPEND properties dependencies optionalDependencies)
+
+  if(ARGV_DEVELOPMENT)
+    list(APPEND properties devDependencies)
+  endif()
+
+  foreach(property ${properties})
+    string(JSON dependencies ERROR_VARIABLE error GET "${package}" ${property})
+
+    if(error MATCHES "NOTFOUND")
+      string(JSON len LENGTH "${dependencies}")
+
+      foreach(i RANGE ${len})
+        if(NOT i EQUAL len)
+          string(JSON specifier MEMBER "${dependencies}" ${i})
+
+          resolve_node_module(${specifier} resolved WORKING_DIRECTORY ${ARGV_WORKING_DIRECTORY})
+
+          if("${resolved}" MATCHES "NOTFOUND" OR "${resolved}" IN_LIST ${result})
+            continue()
+          endif()
+
+          list(APPEND ${result} "${resolved}")
+
+          list_node_modules(${result} WORKING_DIRECTORY ${resolved} ${args})
+        endif()
+      endforeach()
+    endif()
+  endforeach()
 
   return(PROPAGATE ${result})
 endfunction()
