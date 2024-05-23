@@ -1,5 +1,5 @@
 function(find_npm result)
-  if(WIN32)
+  if(CMAKE_HOST_WIN32)
     find_program(
       npm
       NAMES npm.cmd npm
