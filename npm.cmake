@@ -37,6 +37,14 @@ function(install_node_modules)
     set(command install)
   endif()
 
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
+
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package-lock.json OUTPUT_VARIABLE package_lock_path)
+
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY node_modules OUTPUT_VARIABLE node_modules_path)
+
+  file(LOCK "${node_modules_path}" DIRECTORY)
+
   execute_process(
     COMMAND "${npm}" ${command}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
@@ -44,9 +52,7 @@ function(install_node_modules)
     COMMAND_ERROR_IS_FATAL ANY
   )
 
-  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
-
-  cmake_path(APPEND ARGV_WORKING_DIRECTORY package-lock.json OUTPUT_VARIABLE package_lock_path)
+  file(LOCK "${node_modules_path}" DIRECTORY RELEASE)
 
   set_property(
     DIRECTORY
