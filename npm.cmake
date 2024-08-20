@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 function(find_npm result)
   if(CMAKE_HOST_WIN32)
     find_program(
@@ -18,9 +20,9 @@ function(find_npm result)
   return(PROPAGATE ${result})
 endfunction()
 
-function(install_node_modules)
+function(node_module_prefix result)
   cmake_parse_arguments(
-    PARSE_ARGV 0 ARGV "LOCKFILE" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 1 ARGV "" "WORKING_DIRECTORY" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -31,22 +33,110 @@ function(install_node_modules)
 
   find_npm(npm)
 
+  execute_process(
+    COMMAND "${npm}" prefix
+    WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
+    OUTPUT_VARIABLE prefix
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error
+  )
+
+  if(NOT status EQUAL 0)
+    message(FATAL_ERROR "${error}")
+  endif()
+
+  set(${result} "${prefix}")
+
+  return(PROPAGATE ${result})
+endfunction()
+
+function(install_node_module specifier)
+  cmake_parse_arguments(
+    PARSE_ARGV 1 ARGV "FORCE" "VERSION;PREFIX;WORKING_DIRECTORY" ""
+  )
+
+  if(NOT ARGV_VERSION)
+    set(ARGV_VERSION "latest")
+  endif()
+
+  if(ARGV_WORKING_DIRECTORY)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NORMALIZE)
+  else()
+    set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
+  endif()
+
+  if(NOT ARGV_PREFIX)
+    node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
+  endif()
+
+  list(APPEND args --prefix "${ARGV_PREFIX}")
+
+  if(ARGV_FORCE)
+    list(APPEND args --force)
+  endif()
+
+  list(APPEND args ${specifier}@${ARGV_VERSION})
+
+  find_npm(npm)
+
+  execute_process(
+    COMMAND "${npm}" install ${args}
+    WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
+    OUTPUT_QUIET
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error
+  )
+
+  if(NOT status EQUAL 0)
+    message(FATAL_ERROR "${error}")
+  endif()
+endfunction()
+
+function(install_node_modules)
+  cmake_parse_arguments(
+    PARSE_ARGV 0 ARGV "FORCE;LOCKFILE" "PREFIX;WORKING_DIRECTORY" ""
+  )
+
+  if(ARGV_WORKING_DIRECTORY)
+    cmake_path(ABSOLUTE_PATH ARGV_WORKING_DIRECTORY BASE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NORMALIZE)
+  else()
+    set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
+  endif()
+
+  if(NOT ARGV_PREFIX)
+    node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
+  endif()
+
+  list(APPEND args --prefix "${ARGV_PREFIX}")
+
+  if(ARGV_FORCE)
+    list(APPEND args --force)
+  endif()
+
   if(ARGV_LOCKFILE)
     set(command install-clean)
   else()
     set(command install)
   endif()
 
-  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
+  cmake_path(APPEND ARGV_PREFIX package.json OUTPUT_VARIABLE package_path)
 
-  cmake_path(APPEND ARGV_WORKING_DIRECTORY package-lock.json OUTPUT_VARIABLE package_lock_path)
+  cmake_path(APPEND ARGV_PREFIX package-lock.json OUTPUT_VARIABLE package_lock_path)
+
+  find_npm(npm)
 
   execute_process(
-    COMMAND "${npm}" ${command}
+    COMMAND "${npm}" ${command} ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_QUIET
-    COMMAND_ERROR_IS_FATAL ANY
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error
   )
+
+  if(NOT status EQUAL 0)
+    message(FATAL_ERROR "${error}")
+  endif()
 
   set_property(
     DIRECTORY
