@@ -78,6 +78,8 @@ function(install_node_module specifier)
 
   list(APPEND args ${specifier}@${ARGV_VERSION})
 
+  file(LOCK "${ARGV_PREFIX}" DIRECTORY)
+
   find_npm(npm)
 
   execute_process(
@@ -87,6 +89,8 @@ function(install_node_module specifier)
     RESULT_VARIABLE status
     ERROR_VARIABLE error
   )
+
+  file(LOCK "${ARGV_PREFIX}" DIRECTORY RELEASE)
 
   if(NOT status EQUAL 0)
     message(FATAL_ERROR "${error}")
@@ -124,6 +128,8 @@ function(install_node_modules)
 
   cmake_path(APPEND ARGV_PREFIX package-lock.json OUTPUT_VARIABLE package_lock_path)
 
+  file(LOCK "${ARGV_PREFIX}" DIRECTORY)
+
   find_npm(npm)
 
   execute_process(
@@ -133,6 +139,8 @@ function(install_node_modules)
     RESULT_VARIABLE status
     ERROR_VARIABLE error
   )
+
+  file(LOCK "${ARGV_PREFIX}" DIRECTORY RELEASE)
 
   if(NOT status EQUAL 0)
     message(FATAL_ERROR "${error}")
