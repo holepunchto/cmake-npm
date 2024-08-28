@@ -70,7 +70,7 @@ function(install_node_module specifier)
     node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
   endif()
 
-  list(APPEND args --prefix "${ARGV_PREFIX}")
+  set(args --prefix "${ARGV_PREFIX}")
 
   if(ARGV_FORCE)
     list(APPEND args --force)
@@ -108,7 +108,7 @@ function(install_node_modules)
     node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
   endif()
 
-  list(APPEND args --prefix "${ARGV_PREFIX}")
+  set(args --prefix "${ARGV_PREFIX}")
 
   if(ARGV_FORCE)
     list(APPEND args --force)
