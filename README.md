@@ -1,5 +1,13 @@
 # cmake-npm
 
+```
+npm i cmake-npm
+```
+
+```cmake
+find_package(npm REQUIRED PATHS node_modules/cmake-npm)
+```
+
 ## API
 
 #### `find_npm(<result>)`
