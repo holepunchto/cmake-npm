@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard()
 
 function(find_npm result)
   if(CMAKE_HOST_WIN32)
