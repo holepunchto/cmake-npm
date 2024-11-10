@@ -1,6 +1,6 @@
 {
   "name": "cmake-npm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "npm utilities for CMake",
   "files": [
     "*.cmake"
