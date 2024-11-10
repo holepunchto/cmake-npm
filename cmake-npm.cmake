@@ -53,7 +53,7 @@ endfunction()
 
 function(install_node_module specifier)
   cmake_parse_arguments(
-    PARSE_ARGV 1 ARGV "FORCE" "VERSION;PREFIX;WORKING_DIRECTORY" ""
+    PARSE_ARGV 1 ARGV "FORCE" "VERSION;WORKING_DIRECTORY" ""
   )
 
   if(NOT ARGV_VERSION)
@@ -66,11 +66,7 @@ function(install_node_module specifier)
     set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
-  if(NOT ARGV_PREFIX)
-    node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
-  endif()
-
-  set(args --prefix "${ARGV_PREFIX}")
+  set(args "")
 
   if(ARGV_FORCE)
     list(APPEND args --force)
@@ -95,7 +91,7 @@ endfunction()
 
 function(install_node_modules)
   cmake_parse_arguments(
-    PARSE_ARGV 0 ARGV "FORCE;LOCKFILE" "PREFIX;WORKING_DIRECTORY" ""
+    PARSE_ARGV 0 ARGV "FORCE;LOCKFILE" "WORKING_DIRECTORY" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -104,11 +100,7 @@ function(install_node_modules)
     set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
-  if(NOT ARGV_PREFIX)
-    node_module_prefix(ARGV_PREFIX WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}")
-  endif()
-
-  set(args --prefix "${ARGV_PREFIX}")
+  set(args "")
 
   if(ARGV_FORCE)
     list(APPEND args --force)
@@ -120,9 +112,9 @@ function(install_node_modules)
     set(command install)
   endif()
 
-  cmake_path(APPEND ARGV_PREFIX package.json OUTPUT_VARIABLE package_path)
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
 
-  cmake_path(APPEND ARGV_PREFIX package-lock.json OUTPUT_VARIABLE package_lock_path)
+  cmake_path(APPEND ARGV_WORKING_DIRECTORY package-lock.json OUTPUT_VARIABLE package_lock_path)
 
   find_npm(npm)
 
