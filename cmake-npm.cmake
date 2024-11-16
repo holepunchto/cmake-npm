@@ -152,6 +152,23 @@ function(resolve_node_module specifier result)
 
   set(dirname "${ARGV_WORKING_DIRECTORY}")
 
+  if(specifier MATCHES "^\\.")
+    cmake_path(
+      APPEND dirname "${specifier}" package.json
+      OUTPUT_VARIABLE target
+    )
+
+    cmake_path(NORMAL_PATH target)
+
+    if(EXISTS ${target})
+      cmake_path(GET target PARENT_PATH ${result})
+    else()
+      set(${result} "${specifier}-NOTFOUND")
+    endif()
+
+    return(PROPAGATE ${result})
+  endif()
+
   cmake_path(GET dirname ROOT_PATH root)
 
   while(TRUE)
@@ -159,6 +176,8 @@ function(resolve_node_module specifier result)
       APPEND dirname node_modules "${specifier}" package.json
       OUTPUT_VARIABLE target
     )
+
+    cmake_path(NORMAL_PATH target)
 
     if(EXISTS ${target})
       cmake_path(GET target PARENT_PATH ${result})
