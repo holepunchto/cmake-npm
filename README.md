@@ -14,7 +14,7 @@ find_package(cmake-npm REQUIRED PATHS node_modules/cmake-npm)
 
 #### `node_module_prefix(<result> [WORKING_DIRECTORY <path>])`
 
-#### `install_node_module(specifier [FORCE] [VERSION <range>] [WORKING_DIRECTORY <path>])`
+#### `install_node_module(specifier [SAVE] [FORCE] [VERSION <range>] [WORKING_DIRECTORY <path>])`
 
 #### `install_node_modules([LOCKFILE] [FORCE] [WORKING_DIRECTORY <path>])`
 

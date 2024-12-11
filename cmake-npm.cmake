@@ -21,8 +21,12 @@ function(find_npm result)
 endfunction()
 
 function(node_module_prefix result)
+  set(one_value_keywords
+    WORKING_DIRECTORY
+  )
+
   cmake_parse_arguments(
-    PARSE_ARGV 1 ARGV "" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 1 ARGV "" "${one_value_keywords}" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -52,8 +56,18 @@ function(node_module_prefix result)
 endfunction()
 
 function(install_node_module specifier)
+  set(option_keywords
+    SAVE
+    FORCE
+  )
+
+  set(one_value_keywords
+    VERSION
+    WORKING_DIRECTORY
+  )
+
   cmake_parse_arguments(
-    PARSE_ARGV 1 ARGV "FORCE" "VERSION;WORKING_DIRECTORY" ""
+    PARSE_ARGV 1 ARGV "${option_keywords}" "${one_value_keywords}" ""
   )
 
   if(NOT ARGV_VERSION)
@@ -67,6 +81,10 @@ function(install_node_module specifier)
   endif()
 
   set(args "")
+
+  if(ARGV_SAVE)
+    list(APPEND args --save)
+  endif()
 
   if(ARGV_FORCE)
     list(APPEND args --force)
@@ -90,8 +108,17 @@ function(install_node_module specifier)
 endfunction()
 
 function(install_node_modules)
+  set(option_keywords
+    FORCE
+    LOCKFILE
+  )
+
+  set(one_value_keywords
+    WORKING_DIRECTORY
+  )
+
   cmake_parse_arguments(
-    PARSE_ARGV 0 ARGV "FORCE;LOCKFILE" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 0 ARGV "${option_keywords}" "${one_value_keywords}" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -140,8 +167,12 @@ function(install_node_modules)
 endfunction()
 
 function(resolve_node_module specifier result)
+  set(one_value_keywords
+    WORKING_DIRECTORY
+  )
+
   cmake_parse_arguments(
-    PARSE_ARGV 2 ARGV "" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 2 ARGV "" "${one_value_keywords}" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
@@ -152,7 +183,7 @@ function(resolve_node_module specifier result)
 
   set(dirname "${ARGV_WORKING_DIRECTORY}")
 
-  if(specifier MATCHES "^\\.")
+  if(specifier STREQUAL "." OR specifier STREQUAL ".." OR specifier MATCHES "^[.]?/")
     cmake_path(
       APPEND dirname "${specifier}" package.json
       OUTPUT_VARIABLE target
@@ -198,8 +229,16 @@ function(resolve_node_module specifier result)
 endfunction()
 
 function(list_node_modules result)
+  set(option_keywords
+    DEVELOPMENT
+  )
+
+  set(one_value_keywords
+    WORKING_DIRECTORY
+  )
+
   cmake_parse_arguments(
-    PARSE_ARGV 1 ARGV "DEVELOPMENT" "WORKING_DIRECTORY" ""
+    PARSE_ARGV 1 ARGV "${option_keywords}" "${one_value_keywords}" ""
   )
 
   if(ARGV_WORKING_DIRECTORY)
