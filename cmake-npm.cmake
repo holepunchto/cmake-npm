@@ -38,7 +38,7 @@ function(node_module_prefix result)
   find_npm(npm)
 
   execute_process(
-    COMMAND "${npm}" prefix
+    COMMAND ${npm} prefix
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_VARIABLE prefix
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -80,7 +80,7 @@ function(install_node_module specifier)
     set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
-  set(args "")
+  set(args --ignore-scripts --foreground-scripts --allow-git=none)
 
   if(ARGV_SAVE)
     list(APPEND args --save)
@@ -94,8 +94,24 @@ function(install_node_module specifier)
 
   find_npm(npm)
 
+  if(CMAKE_HOST_WIN32)
+    find_program(
+      sfw
+      NAMES sfw.cmd sfw
+    )
+  else()
+    find_program(
+      sfw
+      NAMES sfw
+    )
+  endif()
+
+  if(NOT sfw MATCHES "NOTFOUND")
+    set(npm "${sfw}" ${npm})
+  endif()
+
   execute_process(
-    COMMAND "${npm}" install ${args}
+    COMMAND ${npm} install ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_QUIET
     RESULT_VARIABLE status
@@ -127,16 +143,16 @@ function(install_node_modules)
     set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
-  set(args "")
+  set(args --ignore-scripts --foreground-scripts --allow-git=none)
 
   if(ARGV_FORCE)
     list(APPEND args --force)
   endif()
 
   if(ARGV_LOCKFILE)
-    set(command install-clean)
+    set(install install-clean)
   else()
-    set(command install)
+    set(install install)
   endif()
 
   cmake_path(APPEND ARGV_WORKING_DIRECTORY package.json OUTPUT_VARIABLE package_path)
@@ -145,8 +161,24 @@ function(install_node_modules)
 
   find_npm(npm)
 
+  if(CMAKE_HOST_WIN32)
+    find_program(
+      sfw
+      NAMES sfw.cmd sfw
+    )
+  else()
+    find_program(
+      sfw
+      NAMES sfw
+    )
+  endif()
+
+  if(NOT sfw MATCHES "NOTFOUND")
+    set(npm "${sfw}" ${npm})
+  endif()
+
   execute_process(
-    COMMAND "${npm}" ${command} ${args}
+    COMMAND ${npm} ${install} ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_QUIET
     RESULT_VARIABLE status
