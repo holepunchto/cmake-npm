@@ -80,6 +80,30 @@ function(install_node_module specifier)
     set(ARGV_WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
   endif()
 
+  find_npm(npm)
+
+  execute_process(
+    COMMAND ${npm} ls --depth=0 ${specifier}@${ARGV_VERSION}
+    WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
+    OUTPUT_QUIET
+    ERROR_QUIET
+    RESULT_VARIABLE status
+  )
+
+  if(NOT status EQUAL 0 AND NOT ARGV_VERSION MATCHES "^[~^=<>]?[0-9]")
+    execute_process(
+      COMMAND ${npm} ls --depth=0 ${specifier}
+      WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
+      OUTPUT_QUIET
+      ERROR_QUIET
+      RESULT_VARIABLE status
+    )
+  endif()
+
+  if(status EQUAL 0)
+    return()
+  endif()
+
   set(args --ignore-scripts --foreground-scripts --allow-git=none)
 
   if(ARGV_SAVE)
@@ -91,8 +115,6 @@ function(install_node_module specifier)
   endif()
 
   list(APPEND args ${specifier}@${ARGV_VERSION})
-
-  find_npm(npm)
 
   if(CMAKE_HOST_WIN32)
     find_program(
@@ -113,13 +135,13 @@ function(install_node_module specifier)
   execute_process(
     COMMAND ${npm} install ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
-    OUTPUT_QUIET
+    OUTPUT_VARIABLE output
     RESULT_VARIABLE status
     ERROR_VARIABLE error
   )
 
   if(NOT status EQUAL 0)
-    message(FATAL_ERROR "${error}")
+    message(FATAL_ERROR "${error}${output}")
   endif()
 endfunction()
 
@@ -180,13 +202,13 @@ function(install_node_modules)
   execute_process(
     COMMAND ${npm} ${install} ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
-    OUTPUT_QUIET
+    OUTPUT_VARIABLE output
     RESULT_VARIABLE status
     ERROR_VARIABLE error
   )
 
   if(NOT status EQUAL 0)
-    message(FATAL_ERROR "${error}")
+    message(FATAL_ERROR "${error}${output}")
   endif()
 
   set_property(
