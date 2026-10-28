@@ -1,5 +1,7 @@
 include_guard()
 
+set(NPM_TIMEOUT 600 CACHE STRING "The number of seconds to wait for npm to install packages, or 0 to wait indefinitely")
+
 function(find_npm result)
   if(CMAKE_HOST_WIN32)
     find_program(
@@ -63,6 +65,7 @@ function(install_node_module specifier)
 
   set(one_value_keywords
     VERSION
+    TIMEOUT
     WORKING_DIRECTORY
   )
 
@@ -132,16 +135,27 @@ function(install_node_module specifier)
     set(npm "${sfw}" ${npm})
   endif()
 
+  if(NOT DEFINED ARGV_TIMEOUT)
+    set(ARGV_TIMEOUT ${NPM_TIMEOUT})
+  endif()
+
+  if(ARGV_TIMEOUT GREATER 0)
+    set(timeout TIMEOUT ${ARGV_TIMEOUT})
+  else()
+    set(timeout)
+  endif()
+
   execute_process(
     COMMAND ${npm} install ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_VARIABLE output
     RESULT_VARIABLE status
     ERROR_VARIABLE error
+    ${timeout}
   )
 
   if(NOT status EQUAL 0)
-    message(FATAL_ERROR "${error}${output}")
+    message(FATAL_ERROR "npm install failed: ${status}\n${error}${output}")
   endif()
 endfunction()
 
@@ -152,6 +166,7 @@ function(install_node_modules)
   )
 
   set(one_value_keywords
+    TIMEOUT
     WORKING_DIRECTORY
   )
 
@@ -199,16 +214,27 @@ function(install_node_modules)
     set(npm "${sfw}" ${npm})
   endif()
 
+  if(NOT DEFINED ARGV_TIMEOUT)
+    set(ARGV_TIMEOUT ${NPM_TIMEOUT})
+  endif()
+
+  if(ARGV_TIMEOUT GREATER 0)
+    set(timeout TIMEOUT ${ARGV_TIMEOUT})
+  else()
+    set(timeout)
+  endif()
+
   execute_process(
     COMMAND ${npm} ${install} ${args}
     WORKING_DIRECTORY "${ARGV_WORKING_DIRECTORY}"
     OUTPUT_VARIABLE output
     RESULT_VARIABLE status
     ERROR_VARIABLE error
+    ${timeout}
   )
 
   if(NOT status EQUAL 0)
-    message(FATAL_ERROR "${error}${output}")
+    message(FATAL_ERROR "npm ${install} failed: ${status}\n${error}${output}")
   endif()
 
   set_property(
